@@ -14,12 +14,13 @@ def build_model():
     drop1 = Dropout(0.5)(conv2)
     conv3 = Conv2D(48, (5, 5), strides=(2, 2), padding='valid', activation='relu')(drop1)
     conv4 = Conv2D(64, (3, 3), strides=(1, 1), padding='valid', activation='relu')(conv3)
-    conv5 = Conv2D(64, (3, 3), padding='valid', activation='relu')(conv4)
+    max1 = MaxPooling2D((2, 2))(conv4)
+    conv5 = Conv2D(64, (3, 3), padding='valid', activation='relu')(max1)
 
     flat1 = Flatten()(conv5)
-    dense1 = Dense(100, activation='relu')(flat1)
-    dense2 = Dense(50, activation='relu')(dense1)
-    dense4 = Dense(10, activation='relu')(dense2)
+    dense1 = Dense(128, activation='relu')(flat1)
+    dense2 = Dense(64, activation='relu')(dense1)
+    dense4 = Dense(16, activation='relu')(dense2)
     output = Dense(1, activation='relu')(dense4)
 
     model = Model(inputs, output)

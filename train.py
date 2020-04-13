@@ -1,4 +1,5 @@
 from sklearn.utils import shuffle
+from tensorflow.python.keras.callbacks import ModelCheckpoint
 import numpy as np
 import model
 import preproc
@@ -46,14 +47,14 @@ model = model.build_model()
 #                                  verbose=1,
 #                                  min_delta=0.23,
 #                                  mode='min', )
-#    modelCheckpoint = ModelCheckpoint(filepath,
-#                                      monitor='val_loss',
-#                                      save_best_only=True,
-#                                      mode='min',
-#                                      verbose=1,
-#                                      save_weights_only=True)
+modelCheckpoint = ModelCheckpoint('weights.h5',
+                                      monitor='val_loss',
+                                      save_best_only=True,
+                                      mode='min',
+                                      verbose=1,
+                                      save_weights_only=True)
 #    callbacks_list = [modelCheckpoint, earlyStopping]
-train_generator = generate_training_data()
+train_generator = generate_training_data(32)
 test_generator = generate_validation_data()
 history = model.fit_generator(
         train_generator,
