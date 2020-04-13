@@ -1,12 +1,26 @@
-from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.models import Model, Sequential
 from tensorflow.python.keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten, Dropout, Lambda
-from tensorflow.keras.optimizers import Nadam
 
 IMG_SHAPE = (66, 220, 3)
 
 
 def build_model():
-    inputs = Input(shape=IMG_SHAPE)
+    '''
+    model = Sequential()
+    model.add(Conv2D(24, (5, 5), padding='valid', activation='relu', input_shape=IMG_SHAPE))
+    model.add(Conv2D(36, (5, 5), strides=(2, 2), padding='valid', activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(48, (5, 5), strides=(2, 2), padding='valid', activation='relu'))
+    model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='valid', activation='relu'))
+    model.add(Conv2D(64, (3, 3), padding='valid', activation='relu'))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(16, activation='relu'))
+    model.add(Dense(1, activation='relu'))
+
+    '''
+    inputs = Input(shape=IMG_SHAPE, name='inputs')
     inputs1 = Lambda(lambda x: x/127.5 - 1, input_shape=IMG_SHAPE)(inputs)
 
     conv1 = Conv2D(24, (5, 5), padding='valid', activation='relu')(inputs1)
@@ -20,12 +34,8 @@ def build_model():
     flat1 = Flatten()(conv5)
     dense1 = Dense(128, activation='relu')(flat1)
     dense2 = Dense(64, activation='relu')(dense1)
-    dense4 = Dense(16, activation='relu')(dense2)
-    output = Dense(1, activation='relu')(dense4)
+    dense3 = Dense(16, activation='relu')(dense2)
+    output = Dense(1, activation='relu', name='out')(dense3)
 
-    model = Model(inputs, output)
-    adam = Nadam()
-    model.compile(optimizer=adam, loss='mse')
-
-    print(model.summary())
+    model = Model(inputs=inputs, outputs=output)
     return model
