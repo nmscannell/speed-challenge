@@ -11,63 +11,44 @@ with open('files/train.txt') as f:
     speeds = f.read().splitlines()
 speeds = np.array(speeds).astype(np.float)
 
+images = np.zeros((20399, 66, 220, 3))
+labels = np.zeros(20399)
 
-def generate_training_data(batch_size=16):
-    image_batch = np.zeros((batch_size, 66, 220, 3))
-    label_batch = np.zeros(batch_size)
-    fr = 4080
-    while True:
-        for i in range(batch_size):
-            x1 = cv2.imread('files/train/crop/frame%d.jpg' % fr)
-            x2 = cv2.imread('files/train/crop/frame%d.jpg' % (fr+1))
-            diff = preproc.optical_flow(x1, x2)
-            diff = diff.reshape(1, diff.shape[0], diff.shape[1], diff.shape[2])
-            y = np.mean([speeds[fr], speeds[fr+1]])
-
-            image_batch[i] = diff
-            label_batch[i] = y
-            fr += 1
-        shuffle(image_batch, label_batch)
-        yield (image_batch, label_batch)
-
-
-def generate_validation_data():
-    while True:
-        for i in range(4080):
-            x1 = cv2.imread('files/train/crop/frame%d.jpg' % i)
-            x2 = cv2.imread('files/train/crop/frame%d.jpg' % (i + 1))
-            diff = preproc.optical_flow(x1, x2)
-            diff = diff.reshape(1, diff.shape[0], diff.shape[1], diff.shape[2])
-            y = np.mean([speeds[i], speeds[i + 1]])
-            speed = np.array([[y]])
-            yield (diff, speed)
+for i in range(20399):
+    print(i)
+    x1 = cv2.imread('files/train/crop/frame%d.jpg' % i)
+    x2 = cv2.imread('files/train/crop/frame%d.jpg' % (i+1))
+    diff = preproc.optical_flow(x1, x2)
+    diff = diff.reshape(1, diff.shape[0], diff.shape[1], diff.shape[2])
+    diff = diff/127.5 - 1
+    y = np.mean([speeds[i], speeds[i+1]])
+    images[i] = diff
+    labels[i] = y
+images, labels = shuffle(images, labels)
 
 
 model = model.build_model()
-adam = Nadam()
-model.compile(optimizer=adam, loss='mse', metrics=['accuracy'])
 
-print(model.summary())
 earlyStopping = EarlyStopping(monitor='val_loss',
                               patience=2,
                               verbose=1,
                               min_delta=0.23,
                               mode='min', )
-modelCheckpoint = ModelCheckpoint('weights.h5',
+modelCheckpoint = ModelCheckpoint('weights_ck.h5',
                                   monitor='val_loss',
                                   save_best_only=True,
                                   mode='min',
                                   verbose=1,
                                   save_weights_only=True)
 callbacks_list = [modelCheckpoint, earlyStopping]
-train_generator = generate_training_data(32)
-test_generator = generate_validation_data()
-history = model.fit(train_generator,
-                    steps_per_epoch=508,
+
+history = model.fit(images, labels,
                     epochs=25,
                     callbacks=callbacks_list,
                     verbose=1,
-                    validation_data=test_generator)
+                    validation_split=.2)
+
+model.save_weights('weights2.h5')
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
