@@ -1,6 +1,5 @@
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import ModelCheckpoint, EarlyStopping
-from tensorflow.keras.optimizers import Nadam
 import numpy as np
 import model
 import preproc
@@ -43,6 +42,7 @@ modelCheckpoint = ModelCheckpoint('weights_ck.h5',
 callbacks_list = [modelCheckpoint, earlyStopping]
 
 history = model.fit(images, labels,
+                    shuffle=True,
                     epochs=25,
                     callbacks=callbacks_list,
                     verbose=1,

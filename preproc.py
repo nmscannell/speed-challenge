@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-#from skimage import io
 
 
 def adjust_brightness(image, factor, slice):
@@ -31,7 +30,6 @@ def optical_flow(frame1, frame2):
     return flow
 
 
-
 def preprocess_image_from_path(image_path):
     img = cv2.imread(image_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -44,8 +42,7 @@ def preprocess_image_from_path(image_path):
 #    img = preprocess_image_from_path('files/train/frame%d.jpg' % i)
 #    cv2.imwrite('files/train/crop/frame%d.jpg' % i, img)
 
+
 #for i in range(10798):
 #    img = preprocess_image_from_path('files/test/frame%d.jpg' % i)
 #    cv2.imwrite('files/test/crop/frame%d.jpg' % i, img)
-
-print(cv2.imread('files/train/crop/frame0.jpg').shape)
